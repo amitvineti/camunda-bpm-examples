@@ -101,6 +101,43 @@ public class MultiTenancySharedProcessDefinitionTest {
     assertThat(task.getName(), is("task in tenant specific subprocess"));
   }
 
+
+  @Test
+  public void testTenant1Subprocess() {
+    // deploy default process definitions (which belongs to no tenant)
+    repositoryService
+            .createDeployment()
+            .addClasspathResource("processes/default/mainProcess.bpmn")
+            .deploy();
+
+    // deploy custom process definition for 'tenant2'
+    repositoryService
+            .createDeployment()
+            .tenantId("tenant1")
+            .addClasspathResource("processes/default/subProcess.bpmn")
+            .deploy();
+
+    // deploy custom process definition for 'tenant2'
+    repositoryService
+            .createDeployment()
+            .tenantId("tenant2")
+            .addClasspathResource("processes/tenant2/subProcess.bpmn")
+            .deploy();
+
+    // set the authenticated tenant and start a process instance
+    identityService.setAuthentication("mary", null, Collections.singletonList("tenant1"));
+
+    runtimeService.startProcessInstanceByKey("mainProcess");
+
+    // check that the process instance has the tenant id 'tenant2'
+    ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processDefinitionKey("mainProcess").singleResult();
+    assertThat(processInstance.getTenantId(), is("tenant1"));
+
+    // and started the tenant-specific sub-process which overrides the default one
+    Task task = taskService.createTaskQuery().processDefinitionKey("subProcess").singleResult();
+    assertThat(task.getName(), is("task in default subprocess"));
+  }
+
   @After
   public void clean() {
     for(Deployment deployment : repositoryService.createDeploymentQuery().list()) {
