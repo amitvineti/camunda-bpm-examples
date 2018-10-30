@@ -10,7 +10,7 @@ import org.camunda.bpm.cockpit.plugin.sample.SamplePlugin;
  * @author nico.rehwaldt
  */
 @Path("plugin/" + SamplePlugin.ID)
-public class SamplePluginRootResource extends AbstractPluginRootResource {
+public class  SamplePluginRootResource extends AbstractPluginRootResource {
 
   public SamplePluginRootResource() {
     super(SamplePlugin.ID);

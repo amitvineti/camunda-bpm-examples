@@ -17,6 +17,8 @@ public class CamundaSpringBootExampleApplication {
 		SpringApplication.run(CamundaSpringBootExampleApplication.class, args);
 	}
 
+
+	//start loanRequest BPMN process
 	@PostConstruct
 	public void startProcess() {
 	  runtimeService.startProcessInstanceByKey("loanRequest");

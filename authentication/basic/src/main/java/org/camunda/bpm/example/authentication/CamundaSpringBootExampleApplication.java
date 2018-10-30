@@ -34,6 +34,10 @@ public class CamundaSpringBootExampleApplication extends SpringBootServletInitia
 		newUser.setPassword("demo");
 		newUser.setEmail(EMAIL);
 		identityService.saveUser(newUser);
+
+
+		//list all the users
+		identityService.getUserInfo()
 	}
 
 	@Override

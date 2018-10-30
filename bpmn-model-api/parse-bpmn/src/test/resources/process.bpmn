@@ -1,142 +1,151 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="_8bKMYE5TEeSvRrSmPCK-VA" targetNamespace="http://camunda.org/examples" exporter="camunda modeler" exporterVersion="2.6.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
-  <bpmn2:process id="testProcess" name="Test Process" isExecutable="true">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://camunda.org/examples" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="_8bKMYE5TEeSvRrSmPCK-VA" name="" targetNamespace="http://camunda.org/examples" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <bpmn2:process id="testProcess" isClosed="false" isExecutable="true" name="Test Process" processType="None">
     <bpmn2:startEvent id="startEvent" name="Start Process">
       <bpmn2:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="name" label="Name" type="string" defaultValue="test" />
-          <camunda:formField id="age" label="Age" type="long" defaultValue="0" />
-        </camunda:formData>
+        <bpmn2:camunda:formData>
+          <bpmn2:camunda:formField defaultValue="test" id="name" label="Name" type="string"/>
+          <bpmn2:camunda:formField defaultValue="0" id="age" label="Age" type="long"/>
+        </bpmn2:camunda:formData>
       </bpmn2:extensionElements>
-      <bpmn2:outgoing>flow1</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:serviceTask id="serviceTask" name="Service Task" camunda:asyncBefore="true" camunda:exclusive="false" camunda:expression="${execution.setVariable(&#39;foo&#39;, &#39;bar&#39;)}">
-      <bpmn2:incoming>flow1</bpmn2:incoming>
-      <bpmn2:outgoing>flow2</bpmn2:outgoing>
-    </bpmn2:serviceTask>
-    <bpmn2:sequenceFlow id="flow1" name="" sourceRef="startEvent" targetRef="serviceTask" />
-    <bpmn2:exclusiveGateway id="gatewayFork" name="Fork">
-      <bpmn2:incoming>flow2</bpmn2:incoming>
-      <bpmn2:outgoing>flow3</bpmn2:outgoing>
-      <bpmn2:outgoing>flow4</bpmn2:outgoing>
-    </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="flow2" name="" sourceRef="serviceTask" targetRef="gatewayFork" />
-    <bpmn2:sequenceFlow id="flow3" name="" sourceRef="gatewayFork" targetRef="userTaskA">
+    <bpmn2:serviceTask activiti:exclusive="true" camunda:asyncBefore="true" camunda:exclusive="false" camunda:expression="${execution.setVariable('foo', 'bar')}" id="serviceTask" name="Service Task"/>
+    <bpmn2:sequenceFlow id="flow1" sourceRef="startEvent" targetRef="serviceTask"/>
+    <bpmn2:exclusiveGateway gatewayDirection="Unspecified" id="gatewayFork" name="Fork"/>
+    <bpmn2:sequenceFlow id="flow2" sourceRef="serviceTask" targetRef="gatewayFork"/>
+    <bpmn2:sequenceFlow id="flow3" sourceRef="gatewayFork" targetRef="userTaskA">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"><![CDATA[${foo != 'bar'}]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
-    <bpmn2:userTask id="userTaskA" name="User Task A" camunda:candidateGroups="management, accounting">
-      <bpmn2:incoming>flow3</bpmn2:incoming>
-      <bpmn2:outgoing>flow5</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="flow4" name="" sourceRef="gatewayFork" targetRef="userTaskB">
+    <bpmn2:userTask activiti:exclusive="true" camunda:candidateGroups="management, accounting" id="userTaskA" name="User Task A"/>
+    <bpmn2:sequenceFlow id="flow4" sourceRef="gatewayFork" targetRef="userTaskB">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"><![CDATA[${foo == 'bar'}]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
-    <bpmn2:userTask id="userTaskB" name="User Task B" camunda:assignee="demo">
-      <bpmn2:incoming>flow4</bpmn2:incoming>
-      <bpmn2:outgoing>flow6</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="flow6" name="" sourceRef="userTaskB" targetRef="gatewayJoin" />
-    <bpmn2:exclusiveGateway id="gatewayJoin" name="Join">
-      <bpmn2:incoming>flow6</bpmn2:incoming>
-      <bpmn2:incoming>flow5</bpmn2:incoming>
-      <bpmn2:outgoing>flow7</bpmn2:outgoing>
-    </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="flow5" name="" sourceRef="userTaskA" targetRef="gatewayJoin" />
-    <bpmn2:scriptTask id="scriptTask" name="Script Task" scriptFormat="groovy">
-      <bpmn2:incoming>flow7</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_9</bpmn2:outgoing>
+    <bpmn2:userTask activiti:exclusive="true" camunda:assignee="demo" id="userTaskB" name="User Task B"/>
+    <bpmn2:sequenceFlow id="flow6" sourceRef="userTaskB" targetRef="gatewayJoin"/>
+    <bpmn2:exclusiveGateway gatewayDirection="Unspecified" id="gatewayJoin" name="Join"/>
+    <bpmn2:sequenceFlow id="flow5" sourceRef="userTaskA" targetRef="gatewayJoin"/>
+    <bpmn2:scriptTask activiti:exclusive="true" id="scriptTask" name="Script Task" scriptFormat="groovy">
       <bpmn2:script><![CDATA[println 'hello world']]></bpmn2:script>
     </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="flow7" name="" sourceRef="gatewayJoin" targetRef="scriptTask" />
+    <bpmn2:sequenceFlow id="flow7" sourceRef="gatewayJoin" targetRef="scriptTask"/>
     <bpmn2:endEvent id="endEvent" name="End Process">
       <bpmn2:extensionElements>
-        <camunda:executionListener expression="${execution.setVariable(&#39;finished&#39;, true)}" event="start" />
+        <bpmn2:camunda:executionListener event="start" expression="${execution.setVariable('finished', true)}"/>
       </bpmn2:extensionElements>
-      <bpmn2:incoming>SequenceFlow_9</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:sequenceFlow id="SequenceFlow_9" name="" sourceRef="scriptTask" targetRef="endEvent" />
+    <bpmn2:sequenceFlow id="SequenceFlow_9" sourceRef="scriptTask" targetRef="endEvent"/>
   </bpmn2:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="testProcess">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="startEvent">
-        <dc:Bounds x="536" y="251" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_2" bpmnElement="serviceTask">
-        <dc:Bounds x="622" y="229" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="flow1" sourceElement="_BPMNShape_StartEvent_2" targetElement="_BPMNShape_ServiceTask_2">
-        <di:waypoint xsi:type="dc:Point" x="572" y="269" />
-        <di:waypoint xsi:type="dc:Point" x="622" y="269" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_ExclusiveGateway_2" bpmnElement="gatewayFork" isMarkerVisible="true">
-        <dc:Bounds x="772" y="244" width="50" height="50" />
+  <bpmndi:BPMNDiagram documentation="background=#3C3F41;count=1;horizontalcount=2;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="testProcess">
+      <bpmndi:BPMNShape bpmnElement="startEvent" id="Shape-startEvent">
+        <dc:Bounds height="32.0" width="32.0" x="536.0" y="251.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="828" y="259" width="32" height="22" />
+          <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="flow2" sourceElement="_BPMNShape_ServiceTask_2" targetElement="_BPMNShape_ExclusiveGateway_2">
-        <di:waypoint xsi:type="dc:Point" x="722" y="269" />
-        <di:waypoint xsi:type="dc:Point" x="772" y="269" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_UserTask_2" bpmnElement="userTaskA">
-        <dc:Bounds x="876" y="132" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="flow3" sourceElement="_BPMNShape_ExclusiveGateway_2" targetElement="_BPMNShape_UserTask_2">
-        <di:waypoint xsi:type="dc:Point" x="797" y="244" />
-        <di:waypoint xsi:type="dc:Point" x="797" y="172" />
-        <di:waypoint xsi:type="dc:Point" x="876" y="172" />
+      <bpmndi:BPMNShape bpmnElement="serviceTask" id="Shape-serviceTask">
+        <dc:Bounds height="80.0" width="100.0" x="622.0" y="229.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="794" y="219" width="6" height="6" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_UserTask_3" bpmnElement="userTaskB">
-        <dc:Bounds x="876" y="324" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="flow4" sourceElement="_BPMNShape_ExclusiveGateway_2" targetElement="_BPMNShape_UserTask_3">
-        <di:waypoint xsi:type="dc:Point" x="797" y="294" />
-        <di:waypoint xsi:type="dc:Point" x="797" y="364" />
-        <di:waypoint xsi:type="dc:Point" x="876" y="364" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="794" y="319" width="6" height="6" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_ExclusiveGateway_3" bpmnElement="gatewayJoin" isMarkerVisible="true">
-        <dc:Bounds x="1026" y="243" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="998" y="258" width="29" height="22" />
+          <dc:Bounds height="80.0" width="100.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="flow6" sourceElement="_BPMNShape_UserTask_3" targetElement="_BPMNShape_ExclusiveGateway_3">
-        <di:waypoint xsi:type="dc:Point" x="976" y="364" />
-        <di:waypoint xsi:type="dc:Point" x="1001" y="364" />
-        <di:waypoint xsi:type="dc:Point" x="1051" y="364" />
-        <di:waypoint xsi:type="dc:Point" x="1051" y="293" />
+      <bpmndi:BPMNShape bpmnElement="gatewayFork" id="Shape-gatewayFork" isMarkerVisible="true">
+        <dc:Bounds height="32.0" width="32.0" x="772.0" y="244.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="998" y="364" width="6" height="6" />
+          <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="userTaskA" id="Shape-userTaskA">
+        <dc:Bounds height="80.0" width="100.0" x="876.0" y="132.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="80.0" width="100.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="userTaskB" id="Shape-userTaskB">
+        <dc:Bounds height="80.0" width="100.0" x="876.0" y="324.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="80.0" width="100.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="gatewayJoin" id="Shape-gatewayJoin" isMarkerVisible="true">
+        <dc:Bounds height="32.0" width="32.0" x="1026.0" y="243.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scriptTask" id="Shape-scriptTask">
+        <dc:Bounds height="80.0" width="100.0" x="1126.0" y="228.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="80.0" width="100.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endEvent" id="Shape-endEvent">
+        <dc:Bounds height="32.0" width="32.0" x="1276.0" y="250.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_9" id="BPMNEdge_SequenceFlow_9" sourceElement="scriptTask" targetElement="endEvent">
+        <di:waypoint x="1226.0" y="268.0"/>
+        <di:waypoint x="1276.0" y="266.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="flow5" sourceElement="_BPMNShape_UserTask_2" targetElement="_BPMNShape_ExclusiveGateway_3">
-        <di:waypoint xsi:type="dc:Point" x="976" y="172" />
-        <di:waypoint xsi:type="dc:Point" x="1001" y="172" />
-        <di:waypoint xsi:type="dc:Point" x="1051" y="172" />
-        <di:waypoint xsi:type="dc:Point" x="1051" y="243" />
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1" sourceElement="startEvent" targetElement="serviceTask">
+        <di:waypoint x="568.0" y="267.0"/>
+        <di:waypoint x="622.0" y="269.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1046" y="172" width="6" height="6" />
+          <dc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_ScriptTask_2" bpmnElement="scriptTask">
-        <dc:Bounds x="1126" y="228" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_8" bpmnElement="flow7" sourceElement="_BPMNShape_ExclusiveGateway_3" targetElement="_BPMNShape_ScriptTask_2">
-        <di:waypoint xsi:type="dc:Point" x="1076" y="268" />
-        <di:waypoint xsi:type="dc:Point" x="1126" y="268" />
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2" sourceElement="serviceTask" targetElement="gatewayFork">
+        <di:waypoint x="722.0" y="269.0"/>
+        <di:waypoint x="772.0" y="260.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_EndEvent_3" bpmnElement="endEvent">
-        <dc:Bounds x="1276" y="250" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_9" bpmnElement="SequenceFlow_9" sourceElement="_BPMNShape_ScriptTask_2" targetElement="_BPMNShape_EndEvent_3">
-        <di:waypoint xsi:type="dc:Point" x="1226" y="268" />
-        <di:waypoint xsi:type="dc:Point" x="1276" y="268" />
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3" sourceElement="gatewayFork" targetElement="userTaskA">
+        <di:waypoint x="797.0" y="253.0"/>
+        <di:waypoint x="797.0" y="172.0"/>
+        <di:waypoint x="876.0" y="172.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="794.0" y="219.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4" sourceElement="gatewayFork" targetElement="userTaskB">
+        <di:waypoint x="797.0" y="267.0"/>
+        <di:waypoint x="797.0" y="364.0"/>
+        <di:waypoint x="876.0" y="364.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="794.0" y="319.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5" sourceElement="userTaskA" targetElement="gatewayJoin">
+        <di:waypoint x="976.0" y="172.0"/>
+        <di:waypoint x="1001.0" y="172.0"/>
+        <di:waypoint x="1051.0" y="172.0"/>
+        <di:waypoint x="1026.0" y="259.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="1046.0" y="172.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6" sourceElement="userTaskB" targetElement="gatewayJoin">
+        <di:waypoint x="976.0" y="364.0"/>
+        <di:waypoint x="1001.0" y="364.0"/>
+        <di:waypoint x="1051.0" y="364.0"/>
+        <di:waypoint x="1026.0" y="259.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="998.0" y="364.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7" sourceElement="gatewayJoin" targetElement="scriptTask">
+        <di:waypoint x="1058.0" y="259.0"/>
+        <di:waypoint x="1126.0" y="268.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
